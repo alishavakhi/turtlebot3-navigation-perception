@@ -37,6 +37,7 @@ developed:
 - [Reproducibility status](#reproducibility-status)
 - [My contribution](#my-contribution)
 - [Licence and acknowledgements](#licence-and-acknowledgements)
+- [Test plan](docs/TEST_PLAN.md)
 
 ---
 
@@ -300,6 +301,7 @@ turtlebot3-navigation-perception/
 │   ├── CHANGES.md              every edit made during preparation
 │   ├── UPSTREAM_DEPENDENCIES.md  provenance + licensing of the simulation env
 │   ├── RUNNING.md              what the external launch must provide
+│   ├── TEST_PLAN.md            build/launch/verify procedure, automation layers
 │   ├── AI_USAGE_DISCLOSURE.md  carried over from the report
 │   ├── figures/
 │   │   ├── tf_tree_baseline_run.png / .pdf / .gv
@@ -310,11 +312,15 @@ turtlebot3-navigation-perception/
     └── group29_assignment_1_kalman/   Implementation A (Kalman)
 
 third_party/
-└── ir_2526/                    vendored simulation environment
-    ├── README.md               provenance + licence status
-    ├── NOTICE                  attribution for every author and upstream project
+└── ir_2526/                    the simulation environment, preserved complete
+    ├── README.md               provenance; what is included and what is not
+    ├── NOTICE                  attribution and licence status per component
+    ├── licenses/               full texts of the licences that apply
     ├── ir_launch/              simulation entry points
-    └── ir_base/                world, map, params, URDFs, AprilTag models
+    ├── ir_base/                worlds, maps, params, URDFs, models
+    ├── ir_desription/          UR5 arm and Robotiq gripper description
+    ├── ir_movit_config/        MoveIt 2 configuration and controllers
+    └── apriltag_ros/           AprilTag detection node (v3.3.0, MIT)
 ```
 
 The repository root **is** the colcon workspace, so `colcon build` is run from
@@ -400,36 +406,56 @@ packages and the vendored environment. To build only the project's own code:
 colcon build --symlink-install --packages-select group29_assignment_1
 ```
 
-> **ROS 2 distribution.** The original project never declared one, and no
-> distribution name appears anywhere in the source, launch files or report. It has
-> deliberately **not been guessed** here — see
-> [Reproducibility status](#reproducibility-status). The packages are written
-> against the `rclpy` / Nav2 APIs current in Humble and Jazzy, but this has not
-> been confirmed by building.
+> **ROS 2 distribution: Jazzy — inferred from evidence, not declared.** The
+> vendored `ir_desription/urdf/ur_gripper.urdf` hard-codes 18 mesh paths as
+> `file:///opt/ros/jazzy/share/robotiq_description/...`, and that file is
+> byte-identical to upstream. The environment this project ran in was therefore
+> **ROS 2 Jazzy**.
+>
+> This has a practical consequence: those paths are absolute, so on any other
+> distribution the gripper meshes will not resolve without a symlink or a patch.
+> **Treat Jazzy on Ubuntu 24.04 as the supported configuration.**
+>
+> The evidence is an artefact rather than a declaration. Confirm with whoever ran
+> the original experiments before treating it as certain — see
+> [Reproducibility status](#reproducibility-status).
 
-### 4. The simulation environment — vendored
+### 4. The simulation environment — preserved complete
 
-No external repository needs to be cloned. The Gazebo world, occupancy map,
-TurtleBot 3 and camera descriptions, AprilTag models and Nav2 tuning are all
-included under [`third_party/ir_2526/`](third_party/ir_2526/), vendored at the
-exact upstream commit this project was verified against:
+No external repository needs to be cloned, and this project does not depend on the
+original environment repository remaining available. The environment is included
+**complete** under [`third_party/ir_2526/`](third_party/ir_2526/), pinned to the
+exact commit this project was verified against:
 
 ```
-third_party/ir_2526/   ir_launch + ir_base
-                       @ PieroSimonet/ir_2526 d19ae761
+third_party/ir_2526/   ir_launch + ir_base + ir_desription
+                       + ir_movit_config + apriltag_ros
+                       @ PieroSimonet/ir_2526   d19ae761
 ```
 
-These files were written by **Piero Simonetto** (University of Padova), not by
-this project's author, and are redistributed with his permission. They are
-**not** covered by this repository's Apache-2.0 licence. Authorship, the exact
-provenance, the licence status of every component and the build instructions are
-documented in [`third_party/ir_2526/README.md`](third_party/ir_2526/README.md)
-and [`third_party/ir_2526/NOTICE`](third_party/ir_2526/NOTICE); the reasoning and
-the full component matrix are in
-[`docs/UPSTREAM_DEPENDENCIES.md`](docs/UPSTREAM_DEPENDENCIES.md).
+These 133 files are **133 of the 207 tracked files** in the upstream repository;
+the remaining 74 are listed by group below. Nothing was renamed, reformatted or
+edited, and every included file was verified by SHA-256 against the upstream
+commit after copying.
 
-Every vendored file is byte-identical to upstream — no header, copyright notice
-or licence declaration was altered.
+| Excluded | Files | Why |
+|---|---|---|
+| `ir_base/models/artag/` | 36 | authored by **Nicola Castaman** with no licence anywhere. Replaced by marker images regenerated from the public BSD-2-Clause AprilTag `tag36h11` family definition — the tag ids, geometry and file paths are unchanged |
+| `ir_base/models/walls/arena_walls/` | 3 | authored by **Elisa Tosello** with no licence. Referenced by no world file, so neither simulation is affected |
+| `ir_base/models/{build,install,log}/` | 35 | colcon build output committed upstream by accident; it also embeds the upstream author's local filesystem path |
+
+> **This is not a byte-for-byte complete copy of the upstream repository, and it is
+> not described as one.** All 207 upstream files are preserved privately outside
+> this repository, with a per-file SHA-256 manifest, and the exact 74 excluded
+> paths are enumerated in
+> [`third_party/ir_2526/README.md`](third_party/ir_2526/README.md).
+
+The environment was written by **Piero Simonetto** (University of Padova), not by
+this project's author, and is redistributed with his permission. It is **not**
+covered by this repository's Apache-2.0 licence. Authorship and the licence status
+of every component are recorded in
+[`third_party/ir_2526/NOTICE`](third_party/ir_2526/NOTICE), with the applicable
+licence texts in [`third_party/ir_2526/licenses/`](third_party/ir_2526/licenses/).
 
 ## Running the system
 
@@ -543,18 +569,15 @@ next step and is listed under [Known limitations](#known-limitations).
 Recorded honestly from reading the code; none of these were altered during
 preparation.
 
-1. **The environment is vendored, but the ROS 2 distribution is not pinned.** The
-   course's `ir_launch` and `ir_base` packages are included under
-   [`third_party/ir_2526/`](third_party/ir_2526/), vendored byte-identically at
-   upstream commit `d19ae761`, so no external repository has to be cloned. What
-   remains external is ordinary ROS 2 distribution packages
-   (`nav2-minimal-tb3-sim`, `ur_description`, `ros_gz`), each under its own
-   licence. What is *not* settled is the distribution itself — Humble or Jazzy;
-   see [Reproducibility status](#reproducibility-status). Provenance and the
-   licence boundary are in
-   [`docs/UPSTREAM_DEPENDENCIES.md`](docs/UPSTREAM_DEPENDENCIES.md) and
-   [`third_party/ir_2526/NOTICE`](third_party/ir_2526/NOTICE);
-   [`docs/RUNNING.md`](docs/RUNNING.md) is the interface reference.
+1. **The environment is preserved complete, but the distribution is inferred.**
+   All 133 upstream source files are included under
+   [`third_party/ir_2526/`](third_party/ir_2526/), so no external repository has to
+   be cloned. Two third-party asset groups with unresolved rights (39 files) and
+   35 accidentally committed colcon artefacts are excluded, and all 74 paths are
+   enumerated in [`third_party/ir_2526/README.md`](third_party/ir_2526/README.md).
+   The distribution is **Jazzy**, inferred from 18 hard-coded `/opt/ros/jazzy`
+   mesh paths in the vendored UR5 URDF rather than from a declaration — see
+   [Reproducibility status](#reproducibility-status).
 2. **Scan indexing assumes `angle_min == 0`.** The corridor controller computes
    angles as `np.arange(len(ranges)) * angle_increment`, ignoring
    `msg.angle_min`. This is correct for the TurtleBot 3's 360° LiDAR (where index
@@ -598,7 +621,7 @@ repository. Nothing in the right-hand column was executed here.
 | Corridor hand-off | worked in the recorded run | not re-run |
 | Table detection | detected tables in the recorded run | not re-run |
 | Kalman vs baseline behaviour | both exercised and recorded | not re-run |
-| ROS 2 distribution | worked on the course's distribution, **which is not declared anywhere** | still undetermined |
+| ROS 2 distribution | worked on the course's distribution | **Jazzy** — inferred from 18 hard-coded `/opt/ros/jazzy` mesh paths in the vendored `ur_gripper.urdf` (byte-identical to upstream); not confirmed by the original operators |
 | Dependencies declared in `package.xml` | several were missing | **fixed** (see `docs/CHANGES.md`) |
 | Kalman launch-file wiring | started the wrong package | **fixed**, untested |
 | Python syntax of every node | — | verified (`py_compile`) |
@@ -606,7 +629,7 @@ repository. Nothing in the right-hand column was executed here.
 | Node / topic / action / service names documented in this README | — | verified against source |
 | Secrets and personal data | — | verified absent |
 | Third-party asset licences | — | resolved — marker images regenerated from BSD-2-Clause family data; cafe table verified CC-BY-3.0 and attributed (see [`docs/UPSTREAM_DEPENDENCIES.md`](docs/UPSTREAM_DEPENDENCIES.md)) |
-| Vendored third-party code | — | present and intentional: `third_party/ir_2526/` only, hashed byte-identical to upstream `d19ae761` (see `docs/CHANGES.md`) |
+| Vendored third-party code | — | present and intentional: 133 upstream files under `third_party/ir_2526/`, each SHA-256-verified byte-identical to `d19ae761`; 74 upstream files excluded and enumerated (see `third_party/ir_2526/README.md`) |
 
 Every interface documented in this README was read from the source, not inferred.
 The build and launch commands follow standard ROS 2 practice for this workspace
@@ -651,6 +674,20 @@ It **does not** cover:
   model, © 2012 Nathan Koenig, licensed **CC-BY-3.0** and redistributed under that
   licence with attribution. Licence text in
   `third_party/ir_2526/licenses/CC-BY-3.0.txt`.
+
+- **`third_party/ir_2526/apriltag_ros/`** — the AprilTag detection node v3.3.0,
+  © 2017 Christian Rauch, **MIT**. Redistributed under MIT with the notice retained
+  (`third_party/ir_2526/apriltag_ros/LICENSE`).
+- **`third_party/ir_2526/ir_desription/urdf/robotiq_d.urdf` and
+  `ur_gripper_base.urdf`** — the Robotiq gripper description, © 2022 PickNik
+  Robotics, **BSD-3-Clause**. Licence text in
+  `third_party/ir_2526/licenses/robotiq-BSD-3-Clause.txt`.
+
+Two third-party asset groups are **excluded** because their rights are unresolved:
+`ir_base/models/artag/` (© Nicola Castaman) is replaced by regenerated markers, and
+`ir_base/models/walls/arena_walls/` (© Elisa Tosello) is not included and not
+needed by any world. Both are enumerated in
+[`third_party/ir_2526/README.md`](third_party/ir_2526/README.md).
 
 The marker images under `models/artag/` are **not** third-party material. They are
 rendered by this project from the public AprilTag `tag36h11` family definition
