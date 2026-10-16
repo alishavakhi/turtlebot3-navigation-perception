@@ -433,20 +433,21 @@ third_party/ir_2526/   ir_launch + ir_base + ir_desription
                        @ PieroSimonet/ir_2526   d19ae761
 ```
 
-These 133 files are **133 of the 207 tracked files** in the upstream repository;
-the remaining 74 are listed by group below. Nothing was renamed, reformatted or
-edited, and every included file was verified by SHA-256 against the upstream
-commit after copying.
+These are **168 of the 207 tracked files** in the upstream repository. Every one,
+including the generated build output under `ir_base/models/{build,install,log}/`,
+is byte-identical to upstream — nothing was renamed, reformatted or edited — and
+each was verified by SHA-256 against the upstream commit after copying.
+
+The remaining **39** files are not published, and they are the only ones:
 
 | Excluded | Files | Why |
 |---|---|---|
 | `ir_base/models/artag/` | 36 | authored by **Nicola Castaman** with no licence anywhere. Replaced by marker images regenerated from the public BSD-2-Clause AprilTag `tag36h11` family definition — the tag ids, geometry and file paths are unchanged |
 | `ir_base/models/walls/arena_walls/` | 3 | authored by **Elisa Tosello** with no licence. Referenced by no world file, so neither simulation is affected |
-| `ir_base/models/{build,install,log}/` | 35 | colcon build output committed upstream by accident; it also embeds the upstream author's local filesystem path |
 
 > **This is not a byte-for-byte complete copy of the upstream repository, and it is
 > not described as one.** All 207 upstream files are preserved privately outside
-> this repository, with a per-file SHA-256 manifest, and the exact 74 excluded
+> this repository, with a per-file SHA-256 manifest, and the exact 39 excluded
 > paths are enumerated in
 > [`third_party/ir_2526/README.md`](third_party/ir_2526/README.md).
 
@@ -570,11 +571,11 @@ Recorded honestly from reading the code; none of these were altered during
 preparation.
 
 1. **The environment is preserved complete, but the distribution is inferred.**
-   All 133 upstream source files are included under
+   All 168 upstream source files are included under
    [`third_party/ir_2526/`](third_party/ir_2526/), so no external repository has to
    be cloned. Two third-party asset groups with unresolved rights (39 files) and
-   35 accidentally committed colcon artefacts are excluded, and all 74 paths are
-   enumerated in [`third_party/ir_2526/README.md`](third_party/ir_2526/README.md).
+   and the 39 remaining paths are enumerated in
+   [`third_party/ir_2526/README.md`](third_party/ir_2526/README.md).
    The distribution is **Jazzy**, inferred from 18 hard-coded `/opt/ros/jazzy`
    mesh paths in the vendored UR5 URDF rather than from a declaration — see
    [Reproducibility status](#reproducibility-status).
@@ -629,7 +630,7 @@ repository. Nothing in the right-hand column was executed here.
 | Node / topic / action / service names documented in this README | — | verified against source |
 | Secrets and personal data | — | verified absent |
 | Third-party asset licences | — | resolved — marker images regenerated from BSD-2-Clause family data; cafe table verified CC-BY-3.0 and attributed (see [`docs/UPSTREAM_DEPENDENCIES.md`](docs/UPSTREAM_DEPENDENCIES.md)) |
-| Vendored third-party code | — | present and intentional: 133 upstream files under `third_party/ir_2526/`, each SHA-256-verified byte-identical to `d19ae761`; 74 upstream files excluded and enumerated (see `third_party/ir_2526/README.md`) |
+| Vendored third-party code | — | present and intentional: 168 of 207 upstream files under `third_party/ir_2526/`, each SHA-256-verified byte-identical to `d19ae761`; the 39 excluded are named in `third_party/ir_2526/README.md` |
 
 Every interface documented in this README was read from the source, not inferred.
 The build and launch commands follow standard ROS 2 practice for this workspace
