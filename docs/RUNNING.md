@@ -9,6 +9,12 @@ This document records exactly what that external launch must provide, derived fr
 reading the nodes, so the pipeline can be reproduced against a standard
 `turtlebot3_gazebo` + `nav2_bringup` environment.
 
+> **The authoritative analysis of this dependency is
+> [`UPSTREAM_DEPENDENCIES.md`](UPSTREAM_DEPENDENCIES.md)** — it names the upstream
+> repository and commit, gives the component-by-component licence matrix, and
+> explains why the environment is not bundled here. This file is the interface
+> reference; that one is the provenance and licensing record.
+
 ---
 
 ## What the launch files call

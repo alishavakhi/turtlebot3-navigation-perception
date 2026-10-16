@@ -175,6 +175,54 @@ It originally pointed at the private original `alishavakhi/ws_29_assignments`,
 which would have returned 404 for a public reader. The demonstration-video link
 annotation is untouched and still resolves.
 
+## 8. Self-contained simulation investigation, and testing-documentation correction
+
+**Investigated:** whether the simulation environment could be bundled so this
+repository runs without cloning the course repository
+(`github.com/PieroSimonet/ir_2526`).
+
+**Outcome: it cannot lawfully be bundled.** The upstream repository carries
+**no licence at all** — GitHub reports `license: null`, there is no `LICENSE`
+file, and `ir_base`, `ir_launch` and `ir_desription` all declare
+`<license>TODO: License declaration</license>`. Of the 34 files this project
+needs, **20 source files and 59 binary assets are unlicensed** (the world, map,
+AprilTag models, TurtleBot 3 and camera descriptions, Nav2 tuning). Only the
+launch glue and `apriltag_ros` are permissively licensed, and those alone would
+not make the project runnable.
+
+A partial bundle of just the Apache-2.0 files was considered and **rejected**:
+the launch file's first action resolves `ir_base`, so it would fail immediately,
+producing a repository that looks self-contained but crashes. That is worse than
+a documented dependency.
+
+**Added:** `docs/UPSTREAM_DEPENDENCIES.md` — upstream repository and exact commit
+SHA (`d19ae761`), the full component-by-component licence matrix, why nothing is
+bundled, the two routes to self-containment (written permission, or rebuilding
+from permissive upstream projects), how to run it today against a pinned commit,
+and attribution to the original author.
+
+A complete local snapshot (209 files) of the upstream commit, with a per-file
+SHA-256 manifest, was taken and preserved outside this repository, so the exact
+environment is recoverable even if upstream disappears.
+
+**Corrected — testing documentation.** The previous version of this README said
+`colcon build` and launching were "NOT TESTED", which misread as *the project was
+never tested*. That was wrong and is fixed. The [Results](#results) and
+[Reproducibility status](#reproducibility-status) sections now separate two
+things explicitly:
+
+| | |
+|---|---|
+| The original implementation in the original environment | **tested and working** — ran end to end in Gazebo, evidenced by the recorded demonstrations, the live transform tree and the report |
+| A fresh build and run of *this* repository | **not performed** here — no ROS 2 on the preparation host |
+
+No test result was invented; the change is in what the documentation claims, and
+it now claims neither too little nor too much.
+
+**Expanded:** the install and run sections now cover Ubuntu and ROS 2 versions,
+the full system dependency list, `colcon` build steps, simulation startup, and a
+step-by-step description of what a successful run looks like.
+
 ## Publication blockers — remaining
 
 Only one blocker is left, and it is not a technical one:

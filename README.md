@@ -40,21 +40,29 @@ developed:
 
 ---
 
-## Overview and objectives
+## Overview
 
-The task was an autonomous indoor navigation problem with a twist: the goal is
-not given to the robot in advance, but **encoded in the environment** as a pair
-of AprilTag markers, and the route between start and goal passes through a
-**narrow corridor** where the general-purpose planner is unreliable.
+An autonomous indoor navigation system for a TurtleBot 3 that solves a problem
+general-purpose planners handle poorly: **the goal is not given in advance but
+encoded in the environment**, and the route to it passes through a narrow
+corridor where the planner is unreliable.
 
-The objectives were to:
+The system derives its goal at runtime from a pair of AprilTag markers, drives to
+it with Nav2, detects corridor entry from LiDAR alone and takes over low-level
+control while inside it, then hands control back to Nav2 on exit. On arrival it
+detects cylindrical tables from the laser scan.
 
-1. derive a navigation goal at runtime from two AprilTag detections,
-2. use Nav2 to plan and execute the path to that goal,
-3. detect corridor entry/exit from LiDAR alone and take over low-level control
-   while inside it, returning control to Nav2 on exit,
-4. detect cylindrical tables in the environment after arrival, and
-5. compare a baseline estimator against a **Kalman-filtered** estimator for the
+Two interchangeable estimator implementations are included, so the design decision
+they represent can be compared directly:
+
+1. Runtime goal extraction from two AprilTag detections, with no hard-coded waypoints.
+2. Nav2 path planning and execution, driven through the `NavigateToPose` action.
+3. LiDAR-only corridor detection with hysteresis, and a proportional controller
+   active only inside the corridor.
+4. A hand-off protocol that pauses and resumes the Nav2 lifecycle around the
+   manual segment, then re-issues the goal.
+5. Euclidean-clustering table detection with geometric acceptance criteria.
+6. A baseline estimator versus a **Kalman-filtered** estimator for the
    tag-derived goal position.
 
 Everything runs in **Gazebo simulation** on a TurtleBot 3.
@@ -287,6 +295,7 @@ turtlebot3-navigation-perception/
 ├── CONTRIBUTORS.md
 ├── docs/
 │   ├── CHANGES.md              every edit made during preparation
+│   ├── UPSTREAM_DEPENDENCIES.md  provenance + licensing of the simulation env
 │   ├── RUNNING.md              what the external launch must provide
 │   ├── AI_USAGE_DISCLOSURE.md  carried over from the report
 │   ├── figures/
@@ -322,53 +331,122 @@ but the original manifests omitted (`visualization_msgs`, `python3-numpy`,
 
 ## Installation and build
 
-```bash
-# 1. ROS 2 + Nav2 + TurtleBot 3 (distribution: see the note below)
-sudo apt install ros-$ROS_DISTRO-navigation2 ros-$ROS_DISTRO-nav2-bringup \
-                 ros-$ROS_DISTRO-turtlebot3 ros-$ROS_DISTRO-turtlebot3-gazebo \
-                 ros-$ROS_DISTRO-apriltag-ros ros-$ROS_DISTRO-image-proc \
-                 python3-numpy
+### 1. System prerequisites
 
-# 2. This workspace
+| Requirement | Notes |
+|---|---|
+| Ubuntu | 22.04 (ROS 2 Humble) or 24.04 (ROS 2 Jazzy) — see the distribution note below |
+| ROS 2 desktop | `ros-$ROS_DISTRO-desktop`, which includes Gazebo (`gz`/`ros_gz`) |
+| Nav2 | `navigation2`, `nav2-bringup`, `nav2-minimal-tb3-sim` |
+| TurtleBot 3 | `turtlebot3`, `turtlebot3-description`, `turtlebot3-gazebo` |
+| AprilTag | `apriltag-ros` (the detector used by `camera_group29.launch.yml`) |
+| Image pipeline | `image-proc` |
+| Python | `python3-numpy`, `python3-colcon-common-extensions` |
+
+### 2. Install ROS 2 and the system dependencies
+
+```bash
+# ROS 2 itself, following the official instructions for your Ubuntu version:
+#   https://docs.ros.org/en/ros2_documentation/
+# then the project's dependencies:
+sudo apt update
+sudo apt install -y \
+  ros-$ROS_DISTRO-desktop \
+  ros-$ROS_DISTRO-navigation2 ros-$ROS_DISTRO-nav2-bringup \
+  ros-$ROS_DISTRO-nav2-minimal-tb3-sim \
+  ros-$ROS_DISTRO-turtlebot3 ros-$ROS_DISTRO-turtlebot3-gazebo \
+  ros-$ROS_DISTRO-apriltag-ros ros-$ROS_DISTRO-image-proc \
+  ros-$ROS_DISTRO-ros-gz \
+  python3-numpy python3-colcon-common-extensions
+```
+
+### 3. Get the code and build
+
+```bash
+mkdir -p ~/ros2_ws/src && cd ~/ros2_ws/src
 git clone https://github.com/alishavakhi/turtlebot3-navigation-perception.git
-cd turtlebot3-navigation-perception
+cd ~/ros2_ws
 source /opt/ros/$ROS_DISTRO/setup.bash
 rosdep install --from-paths src --ignore-src -r -y
 colcon build --symlink-install
 source install/setup.bash
 ```
 
-> **ROS 2 distribution:** the original repository never declared one, and no
+The repository root is the colcon workspace root, so `colcon build` is run from
+the repository directory. Build only the packages that fail, if any:
+
+```bash
+colcon build --symlink-install --packages-select group29_assignment_1
+```
+
+### 4. The simulation environment
+
+The simulation world, map, robot description and Nav2 tuning come from a separate
+third-party repository that is **not bundled here** for licensing reasons —
+see **[`docs/UPSTREAM_DEPENDENCIES.md`](docs/UPSTREAM_DEPENDENCIES.md)** for the
+full explanation, the exact upstream commit, and what would be required to make
+this repository self-contained.
+
+Until that is resolved, clone it alongside this repository:
+
+```bash
+cd ~/ros2_ws/src
+git clone https://github.com/PieroSimonet/ir_2526.git
+cd ir_2526 && git checkout d19ae7613e50112f9bcd8bd995bb4572ef71b821
+cd ~/ros2_ws && colcon build --symlink-install && source install/setup.bash
+```
+
+> **ROS 2 distribution.** The original project never declared one, and no
 > distribution name appears anywhere in the source, launch files or report. It has
-> deliberately **not been guessed here**. See
-> [Reproducibility status](#reproducibility-status). Both packages are written
+> deliberately **not been guessed** here — see
+> [Reproducibility status](#reproducibility-status). The packages are written
 > against the `rclpy` / Nav2 APIs current in Humble and Jazzy, but this has not
 > been confirmed by building.
 
 ## Running the system
 
-Launch files expect an external **`ir_launch`** package (see
-[`docs/RUNNING.md`](docs/RUNNING.md)), which started Gazebo and Nav2 and was
-provided by the course — it is **not** part of this repository.
-
-With `ir_launch` present on the `AMENT_PREFIX_PATH`:
-
 ```bash
-# Implementation B — baseline estimator + corridor controller
+# TurtleBot 3 and the navigation stack
+ros2 launch ir_launch assignment_1.launch.py
+
+# in a second terminal — Implementation B (baseline estimator + corridor controller)
 ros2 launch group29_assignment_1 assignment1.launch.py
 
-# Implementation A — Kalman estimator
+# or Implementation A (Kalman-filtered estimator), instead of the line above
 ros2 launch group29_assignment_1_kalman assignment1.launch.py
 ```
 
-Both build a `LaunchDescription` that includes the AprilTag/rectify composable
-container, includes the simulation launch, and starts the nodes. In
-Implementation B the corridor controller is started as a fourth node; in
-Implementation A it is not.
+Both implementations build a `LaunchDescription` that includes the
+AprilTag/rectify composable container, includes the simulation launch, and starts
+the nodes. In Implementation B the corridor controller is started as a fourth
+node; in Implementation A it is not.
 
-[`docs/RUNNING.md`](docs/RUNNING.md) documents exactly what `ir_launch` must
-provide — every topic, service and frame the nodes depend on — so the pipeline can
-be reproduced against a standard `turtlebot3_gazebo` + `nav2_bringup` environment.
+### What to expect
+
+A successful run looks like this:
+
+1. Gazebo opens with the arena world; the TurtleBot 3 spawns at the world's start
+   pose and rviz loads `cfg/assignment_view.rviz`.
+2. `apriltag_ros` detects `tag36h11:1` and `tag36h11:10`, publishing each as a TF
+   frame. Both appear in rviz's TF display.
+3. `AprilTagNode` publishes a goal on `/midpoint` once both tags are visible.
+4. `NavigationNode` brings Nav2 up through its lifecycle, publishes an initial
+   pose, and sends the goal. The robot drives toward the midpoint.
+5. On entering the corridor, `/corridor_status` goes `true`, Nav2 is paused, the
+   corridor controller takes over `/cmd_vel`, and the robot drives through. On
+   exit, Nav2 resumes and the goal is re-sent.
+6. On arrival, `/navigation_completed` goes `true` and the table detector clusters
+   the laser scan, publishing up to three table centres on `/tables` with cylinder
+   markers on `/table_markers`.
+7. `[Nav] Ready. Waiting for midpoint...` from `NavigationNode` and
+   `SUCCESS: All 3 tables found.` from `TableDetectorNode` are the two log lines
+   that indicate the run completed as intended.
+
+The recorded demonstrations of both implementations are linked under
+[Demo](#demo) above.
+
+[`docs/RUNNING.md`](docs/RUNNING.md) documents every topic, service and frame the
+nodes depend on, and what the external launch must therefore provide.
 
 ## Configuration
 
@@ -393,33 +471,57 @@ Node parameters (declared in code, overridable at launch): `target_frame`,
 
 ## Results
 
-The accompanying report describes the system as operating reliably in
-simulation, with clean coordination between perception, navigation and low-level
-control, and the corridor bonus completing without manual intervention or Nav2
-recovery behaviours.
+### Verification status — read this first
 
-**No quantitative metrics are presented here, because none were recorded.** There
-is no success-rate table, no timing measurement and no accuracy figure in the
-source, the report or the git history. Rather than invent numbers, this section
-records the two properties that *are* evidenced:
+There are two distinct things here, and conflating them would be misleading:
 
-- the pipeline ran end to end in Gazebo, evidenced by the recorded demonstrations
-  and the captured transform tree;
+| | Status |
+|---|---|
+| **The original implementation, in the original simulation environment** | **Tested and working.** Both implementations ran end to end in Gazebo. This is evidenced by the recorded demonstrations, by the transform tree captured live during a run (below), and by the results written up in the accompanying report. |
+| **A fresh build and run of *this* repository** | **Not performed.** No ROS 2 installation was available on the machine where this repository was prepared, so `colcon build` and a self-contained launch have not been executed here. |
+
+So: this is a working, tested system whose *packaging* is unverified — not an
+untested system. The distinction matters, and no result below is invented.
+
+### What the original runs demonstrated
+
+The accompanying report describes the system as operating reliably in simulation,
+with clean coordination between perception, navigation and low-level control. The
+corridor traversal completed without manual intervention and without Nav2
+recovery behaviours on that run, and both the Kalman-filtered estimator and the
+baseline estimator were exercised and recorded.
+
+### Quantitative results
+
+**No numeric metrics are published here, because none were recorded during the
+original work.** There is no success-rate table, no timing measurement and no
+accuracy figure in the source, the report or the git history. Rather than present
+invented numbers, this section records only what is actually evidenced:
+
+- the pipeline ran end to end in Gazebo — evidenced by the recorded
+  demonstrations and the live transform tree;
+- the corridor hand-off worked in the recorded run: control passed from Nav2 to
+  the corridor controller and back, without manual intervention;
 - the table detector's acceptance criteria are explicit and geometric
   (0.05–0.45 m cluster width, 0.5 m de-duplication radius), so its behaviour is
   inspectable even without a measured score.
 
-Measuring the estimator, for example comparing position variance between the
-baseline and Kalman implementations on the same tag trajectory, would be the
-natural next step and is listed under [Known limitations](#known-limitations).
+Quantifying the estimator — for example comparing position variance between the
+baseline and Kalman implementations on the same tag trajectory — is the natural
+next step and is listed under [Known limitations](#known-limitations).
 
 ## Known limitations
 
 Recorded honestly from reading the code; none of these were altered during
 preparation.
 
-1. **External `ir_launch` dependency.** Neither launch file is self-contained.
-   See [`docs/RUNNING.md`](docs/RUNNING.md).
+1. **The simulation environment is an external dependency.** Neither launch file is
+   self-contained — they need the course's `ir_launch` / `ir_base` packages, which
+   are **not** bundled because the upstream repository is unlicensed.
+   [`docs/UPSTREAM_DEPENDENCIES.md`](docs/UPSTREAM_DEPENDENCIES.md) gives the
+   provenance, the full licensing matrix and the two routes to making this
+   repository self-contained;
+   [`docs/RUNNING.md`](docs/RUNNING.md) is the interface reference.
 2. **Scan indexing assumes `angle_min == 0`.** The corridor controller computes
    angles as `np.arange(len(ranges)) * angle_increment`, ignoring
    `msg.angle_min`. This is correct for the TurtleBot 3's 360° LiDAR (where index
@@ -452,25 +554,29 @@ preparation.
 
 ## Reproducibility status
 
-What was and was not verified during preparation. Stated plainly so that nothing
-here is mistaken for a tested claim.
+Two columns, because the answer differs: what the original authors verified in the
+original environment, and what was verified during the preparation of *this*
+repository. Nothing in the right-hand column was executed here.
 
-| Check | Status |
-|---|---|
-| Python syntax of every node | **verified** (`python3 -m py_compile`) |
-| `package.xml` well-formed and consistent | **verified** (parsed, dependencies cross-checked against imports) |
-| `CMakeLists.txt` install targets match the files present | **verified by inspection** |
-| Launch files reference files that exist in the package | **verified by inspection** |
-| Node/topic/action/service names in this README | **verified** against source |
-| `colcon build` | **NOT TESTED** — no ROS 2 installation was available |
-| Launching either implementation in Gazebo | **NOT TESTED** |
-| ROS 2 distribution | **UNDETERMINED** — not declared anywhere in the original repository |
-| Reported behaviour of the corridor hand-off | from the report and video, not independently reproduced |
-| No quantitative results | none exist to reproduce |
+| Check | In the original environment | In this repository |
+|---|---|---|
+| `colcon build` | built and ran | **NOT RUN** — no ROS 2 on the preparation host |
+| Launching in Gazebo | ran end to end, recorded | **NOT RUN** here |
+| Corridor hand-off | worked in the recorded run | not re-run |
+| Table detection | detected tables in the recorded run | not re-run |
+| Kalman vs baseline behaviour | both exercised and recorded | not re-run |
+| ROS 2 distribution | worked on the course's distribution, **which is not declared anywhere** | still undetermined |
+| Dependencies declared in `package.xml` | several were missing | **fixed** (see `docs/CHANGES.md`) |
+| Kalman launch-file wiring | started the wrong package | **fixed**, untested |
+| Python syntax of every node | — | verified (`py_compile`) |
+| `package.xml` well-formed, deps cross-checked against imports | — | verified |
+| Node / topic / action / service names documented in this README | — | verified against source |
+| Secrets, personal data, vendored code | — | verified absent |
 
-Every interface documented above was read from the source, not inferred. The
-build and launch commands follow standard ROS 2 practice for this workspace shape
-but have not been executed.
+Every interface documented in this README was read from the source, not inferred.
+The build and launch commands follow standard ROS 2 practice for this workspace
+shape and are consistent with the environment the project originally ran in, but
+they have not been executed as part of this repository's preparation.
 
 ## My contribution
 
