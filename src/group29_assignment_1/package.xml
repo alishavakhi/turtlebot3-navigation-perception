@@ -1,12 +1,17 @@
 <package format="3">
   <name>group29_assignment_1</name>
   <version>0.0.0</version>
-  <description>Group 29 assignments package</description>
+  <description>
+    TurtleBot3 navigation and perception pipeline (Implementation B, baseline
+    estimator). AprilTag-based goal extraction, Nav2 autonomous navigation, a
+    LiDAR corridor-following controller, and LiDAR table detection.
+  </description>
   <maintainer email="45035448+alishavakhi@users.noreply.github.com">Ali Shavakhi</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <!-- Runtime dependencies, verified against the actual node imports -->
   <exec_depend>rclpy</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
@@ -15,8 +20,15 @@
   <exec_depend>tf2_ros</exec_depend>
   <exec_depend>tf2_geometry_msgs</exec_depend>
   <exec_depend>apriltag_msgs</exec_depend>
-
   <exec_depend>std_msgs</exec_depend>
+  <!-- visualization_msgs: table_detector.py publishes Marker cylinders -->
+  <exec_depend>visualization_msgs</exec_depend>
+  <!-- numpy: corridor_controller_node.py uses it for LiDAR scan maths -->
+  <exec_depend>python3-numpy</exec_depend>
+  <!-- composable AprilTag container used by launch/camera_group29.launch.yml -->
+  <exec_depend>rclcpp_components</exec_depend>
+  <exec_depend>apriltag_ros</exec_depend>
+  <exec_depend>image_proc</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>

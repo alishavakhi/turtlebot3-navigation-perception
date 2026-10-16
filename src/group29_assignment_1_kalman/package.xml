@@ -1,12 +1,17 @@
 <package format="3">
   <name>group29_assignment_1_kalman</name>
   <version>0.0.0</version>
-  <description>Group 29 assignments package</description>
+  <description>
+    TurtleBot3 AprilTag midpoint estimation with a linear Kalman filter
+    (Implementation A). Constant-velocity model over [x, y, vx, vy]; each TF
+    lookup is a position measurement update. No corridor controller.
+  </description>
   <maintainer email="45035448+alishavakhi@users.noreply.github.com">Ali Shavakhi</maintainer>
   <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
+  <!-- Runtime dependencies, verified against the actual node imports -->
   <exec_depend>rclpy</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>sensor_msgs</exec_depend>
@@ -15,8 +20,16 @@
   <exec_depend>tf2_ros</exec_depend>
   <exec_depend>tf2_geometry_msgs</exec_depend>
   <exec_depend>apriltag_msgs</exec_depend>
-
   <exec_depend>std_msgs</exec_depend>
+  <!-- numpy: april_tag_node.py implements the Kalman filter with it -->
+  <exec_depend>python3-numpy</exec_depend>
+  <!-- visualization_msgs: table_detector.py publishes Marker cylinders -->
+  <exec_depend>visualization_msgs</exec_depend>
+  <!-- shared AprilTag/rectify container, supplied by group29_assignment_1 -->
+  <exec_depend>group29_assignment_1</exec_depend>
+  <exec_depend>rclcpp_components</exec_depend>
+  <exec_depend>apriltag_ros</exec_depend>
+  <exec_depend>image_proc</exec_depend>
 
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
