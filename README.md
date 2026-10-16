@@ -91,10 +91,11 @@ Recorded demonstrations of both implementations (authored by the project team):
 Both are in the project's public video folder:
 **<https://drive.google.com/drive/folders/1hunotXlMFh6AQY6Q9B9w4cY3GzINZ1f5>**
 
-A real transform tree captured during a run of Implementation B is included as
-[`docs/figures/tf_tree_baseline_run.png`](docs/figures/tf_tree_baseline_run.png)
+A real transform tree captured during a run of Implementation B is included below
 (source: ROS 2 `view_frames`; `.gv` and `.pdf` alongside). It is evidence that
 the perception, robot and Nav2 frames were all live and connected.
+
+![Transform tree captured during a run of Implementation B, showing the world, robot, camera and laser frames connected](docs/figures/tf_tree_baseline_run.png)
 
 ## System architecture
 
