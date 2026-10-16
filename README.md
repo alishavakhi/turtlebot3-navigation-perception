@@ -22,7 +22,7 @@ developed:
 
 ## Contents
 
-- [Overview and objectives](#overview-and-objectives)
+- [Overview and objectives](#overview)
 - [Features](#features)
 - [Demo](#demo)
 - [System architecture](#system-architecture)
@@ -89,7 +89,10 @@ Everything runs in **Gazebo simulation** on a TurtleBot 3.
 
 ## Demo
 
-Recorded demonstrations of both implementations (authored by the project team):
+Recordings of the **working system**, captured by the project team while it was
+being developed and demonstrated. They are the primary evidence that the pipeline
+was implemented and ran end to end, and they are what the
+[Results](#results) section refers to.
 
 | Demonstration | Shows |
 |---|---|
@@ -602,6 +605,7 @@ repository. Nothing in the right-hand column was executed here.
 | `package.xml` well-formed, deps cross-checked against imports | — | verified |
 | Node / topic / action / service names documented in this README | — | verified against source |
 | Secrets and personal data | — | verified absent |
+| Third-party asset licences | — | resolved — marker images regenerated from BSD-2-Clause family data; cafe table verified CC-BY-3.0 and attributed (see [`docs/UPSTREAM_DEPENDENCIES.md`](docs/UPSTREAM_DEPENDENCIES.md)) |
 | Vendored third-party code | — | present and intentional: `third_party/ir_2526/` only, hashed byte-identical to upstream `d19ae761` (see `docs/CHANGES.md`) |
 
 Every interface documented in this README was read from the source, not inferred.
@@ -611,25 +615,24 @@ they have not been executed as part of this repository's preparation.
 
 ## My contribution
 
-This was a **two-person group project** (Group 29). Work is not presented here as
-solely mine.
+My work in this repository, in the order that best shows it:
 
-**Collaborators:** Ali Shavakhi, Vaheid Labbaf — co-authors of the accompanying
-report.
+- **The Kalman-filtered estimator is entirely mine.** `group29_assignment_1_kalman`
+  — the `[x, y, vx, vy]` constant-velocity model, the measurement update against
+  successive tag detections, and the change-triggered goal publishing. All 3 of its
+  commits.
+- **The baseline perception and navigation package was led by me.** Runtime AprilTag
+  goal extraction, the Nav2 lifecycle hand-off protocol, LiDAR corridor detection
+  with hysteresis, the proportional corridor controller, and Euclidean-clustering
+  table detection — 14 of the 19 commits in `group29_assignment_1`.
+- **Across the original repository as a whole** I am the majority committer: 26 of
+  40 commits.
 
-Commit-level contribution to the original repository, by package:
-
-| Package | Ali Shavakhi | Vaheid Labbaf | Reading |
-|---|---|---|---|
-| `group29_assignment_1` (baseline + corridor) | **14 commits** | 5 commits | led by Ali Shavakhi |
-| `group29_assignment_1_kalman` (Kalman) | **3 commits** | 0 commits | **solely Ali Shavakhi** |
-| overall | 26 of 40 commits | 14 of 40 | |
-
-So the **Kalman-filtered estimator is entirely my own work**, and the baseline
-package plus the corridor controller integration was led by me with contributions
-from my teammate. The report describes both implementations as jointly authored.
-
-See [`CONTRIBUTORS.md`](CONTRIBUTORS.md).
+This was a **two-person group project** (Group 29) and the accompanying report is
+jointly authored, which is stated here rather than glossed over. The full
+commit-level breakdown by package — including what my teammate contributed — is in
+[`CONTRIBUTORS.md`](CONTRIBUTORS.md), the authoritative attribution record for this
+repository. Nothing authored by anyone else is presented here as mine.
 
 ## Licence and acknowledgements
 
@@ -642,12 +645,18 @@ documentation in this repository — that is, `src/`, `docs/` and the READMEs.
 It **does not** cover:
 
 - **`third_party/ir_2526/`** — the vendored simulation environment, written by
-  **Piero Simonetto** and redistributed with his permission. Copyright remains
-  with the original authors; see
-  [`third_party/ir_2526/NOTICE`](third_party/ir_2526/NOTICE). Two model
-  directories within it are authored by third parties
-  (`models/artag` — Nicola Castaman; `models/cafe_table` — Nate Koenig /
-  Open Robotics) and are also not covered.
+  **Piero Simonetto** and redistributed with his permission. Copyright remains with
+  the original authors; see [`third_party/ir_2526/NOTICE`](third_party/ir_2526/NOTICE).
+- **`third_party/ir_2526/ir_base/models/cafe_table/`** — the Gazebo `cafe_table`
+  model, © 2012 Nathan Koenig, licensed **CC-BY-3.0** and redistributed under that
+  licence with attribution. Licence text in
+  `third_party/ir_2526/licenses/CC-BY-3.0.txt`.
+
+The marker images under `models/artag/` are **not** third-party material. They are
+rendered by this project from the public AprilTag `tag36h11` family definition
+(AprilRobotics, **BSD-2-Clause**), and are redistributed under that licence with the
+notice in the `NOTICE` and the licence text in
+`third_party/ir_2526/licenses/AprilTag-BSD-2-Clause.txt`.
 - **`docs/reports/`** — the academic report, the authors' own work, included with
   the co-author's consent.
 

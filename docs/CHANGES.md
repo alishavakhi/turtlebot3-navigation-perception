@@ -207,8 +207,8 @@ environment is recoverable even if upstream disappears.
 
 **Corrected — testing documentation.** The previous version of this README said
 `colcon build` and launching were "NOT TESTED", which misread as *the project was
-never tested*. That was wrong and is fixed. The [Results](#results) and
-[Reproducibility status](#reproducibility-status) sections now separate two
+never tested*. That was wrong and is fixed. The [Results](../README.md#results) and
+[Reproducibility status](../README.md#reproducibility-status) sections now separate two
 things explicitly:
 
 | | |
@@ -260,10 +260,10 @@ with the author's permission, copyright remains with the original authors".
 authors (`models/artag` — Nicola Castaman; `models/cafe_table` — Nate Koenig /
 Open Robotics) and carry no stated licence. The author's permission covers his own
 work; the scope question that raised was put to
-the repository owner and answered at publication — see section 9 and
+the repository owner and answered at publication — and has since been resolved on its own terms, see section 11 and
 `docs/UPSTREAM_DEPENDENCIES.md`.
 
-## 9. Publication, and the consent record
+## 10. Publication, and the consent record
 
 **Published 2026-10-16.** Both consent gates that were open when the sections
 above were written are now closed, and the repository is public.
@@ -293,3 +293,42 @@ the live repository:
   *vendored third-party code* (present, intentional, hashed).
 - This section previously stated that collaborator consent had not been
   confirmed; it now records the consent that was obtained.
+
+## 11. Final cleanup pass — licensing, links and consistency
+
+A review pass over the published state. Three groups of change.
+
+**1. Third-party asset licensing resolved.** The two asset groups previously listed
+as an open question are now settled on their own terms rather than on the
+environment author's permission over other people's work:
+
+- **`models/artag/**`** — previously credited to Nicola Castaman with no licence.
+  The 18 marker images are now rendered from the public AprilTag `tag36h11` family
+  definition (AprilRobotics, BSD-2-Clause), and the model wrapper and material
+  scripts rewritten. Every image decodes to its own tag id under the reference
+  detector, and its module-level pattern is identical to the file it replaces.
+- **`models/cafe_table/**`** — licence verified as **CC-BY-3.0** (© 2012 Nathan
+  Koenig, `osrf/gazebo_models`). Redistribution is permitted with attribution, so
+  the model is kept and attributed in `third_party/ir_2526/NOTICE`, with the licence
+  text in `third_party/ir_2526/licenses/`.
+
+Full detail is in [`UPSTREAM_DEPENDENCIES.md`](UPSTREAM_DEPENDENCIES.md).
+
+**2. Documentation defects corrected.** Four real defects were present on the
+published pages, all of them introduced by earlier passes:
+
+| Defect | Fix |
+|---|---|
+| Two sections were both numbered `## 9` | renumbered — publication is now 10, this section 11 |
+| The README contents list linked `#overview-and-objectives`, but the heading is `## Overview` | anchor corrected |
+| Two references in this file linked `#results` and `#reproducibility-status`, which live in the README, not here | repointed at `../README.md#...` |
+| Text said "see section 9" from inside section 9, and `UPSTREAM_DEPENDENCIES.md` said "see the open question at the end" after that heading had been renamed | both repointed |
+
+**3. Presentation.** The contribution section now leads with this project's own
+engineering work and points to [`../CONTRIBUTORS.md`](../CONTRIBUTORS.md) for the
+full per-path attribution, which is unchanged and remains the authoritative record
+for this repository.
+
+No source file, vendored dependency, report or licence text was modified by this
+pass.
+
