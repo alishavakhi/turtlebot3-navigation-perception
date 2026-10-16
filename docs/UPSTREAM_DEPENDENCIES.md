@@ -1,163 +1,146 @@
-# Upstream simulation dependency — provenance and licensing
+# Simulation environment — provenance, permission and licensing
 
-This project was developed and tested inside a Gazebo simulation environment
-provided for the course. That environment is a **separate third-party
-repository**, not part of this project. This document records exactly which
-upstream components this project needs, where each came from, and — importantly —
-**why the environment is not bundled here.**
+This project runs in a Gazebo simulation environment **written by someone else**.
+It is vendored into this repository under
+[`third_party/ir_2526/`](../third_party/ir_2526/) so the project can be built and
+run without cloning an external repository. This document records where it came
+from, what permission exists, and — importantly — what is **not** covered.
 
 ---
 
-## The upstream repository
+## Provenance
 
 ```
-Repository : https://github.com/PieroSimonet/ir_2526
-Commit     : d19ae7613e50112f9bcd8bd995bb4572ef71b821
-Date       : 2025-09-10 16:23:42 +0200
-Author     : pierosimonet <simonetto.piero@gmail.com>
-Branch     : main (the only branch)
+Upstream repository : https://github.com/PieroSimonet/ir_2526
+Upstream commit     : d19ae7613e50112f9bcd8bd995bb4572ef71b821
+Commit date         : 2025-09-10 16:23:42 +0200
+Commit author       : pierosimonet <simonetto.piero@gmail.com>
+Default branch      : main (the only branch)
+Vendored on         : 2026-10-16
 ```
 
-A full local snapshot of that commit (209 files) was taken during preparation and
-its per-file SHA-256 manifest recorded, so the exact environment this project ran
-against is preserved even if the upstream repository disappears.
+Every vendored file is **byte-identical** to that commit. Verified by hashing all
+70 files against the upstream snapshot after copying — no header, copyright notice
+or licence declaration was altered.
 
-## Why the environment is not bundled in this repository
+A complete snapshot of the upstream commit (209 files) with a per-file SHA-256
+manifest is also held outside this repository, so the exact environment is
+recoverable independently of both repositories.
 
-**The upstream repository has no licence.** GitHub reports `license: null`, there
-is no `LICENSE` file at its root, and three of its five packages declare
-`<license>TODO: License declaration</license>` in their `package.xml`. Under
-default copyright, that means **all rights reserved** — the code may be read and
-used, but not redistributed.
+## Permission
 
-There is also a specific course instruction not to commit the instructor's code as
-part of the coursework, which points the same way.
+The environment is redistributed here **with the permission of the original
+author, Piero Simonetto**, granted on the basis that attribution is maintained.
 
-So the environment is **deliberately not vendored here.** Copying it would be a
-licence violation, and the honest position is to document the dependency rather
-than quietly absorb it.
+The upstream repository carries **no licence**: GitHub reports `license: null`,
+there is no `LICENSE` file at its root, and `ir_base`, `ir_launch` and
+`ir_desription` each declare `<license>TODO: License declaration</license>` in
+their `package.xml`. No licence is asserted for the vendored material, and none
+was invented. Its status is:
 
-## Component-by-component licence matrix
+> Redistributed with the author's permission. Copyright remains with the original
+> authors. All rights reserved other than the redistribution expressly permitted
+> here.
 
-Licence status was determined from each file's *own* copyright header, from
-package-level `package.xml` declarations, and from whether the package actually
-ships the licence text it declares.
+The vendored files are therefore **not** covered by this repository's Apache-2.0
+licence, which applies only to `src/`, `docs/` and the READMEs.
 
-### Needed by this project — TurtleBot3 navigation
+## What that permission does not necessarily cover
 
-| Component | Upstream path | Licence | Bundled here? |
-|---|---|---|---|
-| Simulation launch | `ir_launch/launch/assignment_1.launch.py` | **Apache-2.0** (© 2023 Open Source Robotics Foundation) | No — see below |
-| Robot spawner | `ir_launch/launch/spawn_tb3_launch.py` | **Apache-2.0** (© 2023 OSRF, © 2024 Open Navigation LLC) | No |
-| Gazebo world | `ir_base/worlds/iaslab_camera_tables.sdf` | **NO LICENCE** | No |
-| Occupancy map | `ir_base/maps/lab_map.pgm` / `.yaml` | **NO LICENCE** | No |
-| Nav2 parameters | `ir_base/params/nav2_params.yaml` | **NO LICENCE** | No |
-| ROS–Gazebo bridge config | `ir_base/params/turtlebot3_waffle_bridge.yaml` | **NO LICENCE** | No |
-| TurtleBot 3 description | `ir_base/urdf/turtlebot3_waffle.urdf` | **NO LICENCE** | No |
-| RGB camera description | `ir_base/urdf/camera.urdf` | **NO LICENCE** | No |
-| AprilTag models + materials | `ir_base/models/artag/**` (21 files) | **NO LICENCE** | No |
-| Package scaffolding | `ir_base/{package.xml,CMakeLists.txt}` | **NO LICENCE** | No |
-| AprilTag detector | `apriltag_ros/**` (12 files) | **MIT** (ships `LICENSE`, declares MIT) | No — available upstream |
+The permission is the professor's to give for **his own work**. The environment
+also contains material authored by other people, and he is not necessarily the
+rights holder for it. Two such items are **required** to load the world and are
+therefore still included:
 
-### Summary
-
-|  | Files | Redistributable? |
+| Item | Author | Status |
 |---|---|---|
-| Apache-2.0 / BSD-3-Clause / MIT | 14 of 34 needed source files (plus `apriltag_ros`) | **Yes, with attribution** |
-| **No licence at all** | **20 source files + 59 binary assets** (worlds, maps, models, meshes, URDFs) | **No** |
+| `ir_base/models/artag/**` — ARTag model and AprilTag textures (21 files) | **Nicola Castaman** `<nicola.castaman@dei.unipd.it>` | No licence stated in `model.config`. **Required by the world.** |
+| `ir_base/models/cafe_table/**` — the table model | **Nate Koenig** `<nate@osrfoundation.org>`, Open Robotics | No licence stated in `model.config`. Originates from the Gazebo model collection, whose models are generally permissive or CC-BY, but this has not been confirmed for this copy. |
+| `ir_launch/launch/assignment_1.launch.py` and `spawn_tb3_launch.py` | Open Source Robotics Foundation; Open Navigation LLC | **Apache-2.0** — redistribution permitted, notice intact in the files |
+| Launch files derived from Universal Robots bringup | Stogl Robotics Consulting UG | **BSD-3-Clause** — redistribution permitted, notice intact |
 
-The permissive files are the *glue*, not the *environment*. The world, the map,
-the robot and camera descriptions, the AprilTag models and the Nav2 tuning are all
-unlicensed — and those are precisely what makes the simulation a simulation.
+Everything else under `third_party/ir_2526/` is Piero Simonetto's own work.
 
-## Why a partial bundle was rejected
+**The two model directories are the open item.** They should either be confirmed
+as covered by the professor's permission, or the authors' agreement obtained, or
+the models replaced — see the open question at the end.
 
-It would be lawful to copy only the Apache-2.0 launch files. It was deliberately
-**not done**, for three reasons:
+## What is vendored, and what was left out
 
-1. **It would not make the project runnable.** The launch file's first act is
-   `get_package_share_directory('ir_base')` — with `ir_base` absent, it fails
-   immediately. A reader would see a "self-contained" repository whose launch
-   crashes.
-2. **It would misrepresent the state.** A `third_party/` directory holding a
-   fragment implies self-containment that does not exist.
-3. **It would degrade the repository.** Twenty files of dead glue referencing
-   absent packages is worse than a clear, documented dependency.
-
-The useful, lawful subset is staged locally and can be added in one commit the
-moment permission is granted — see below.
-
-## What would make this project fully self-contained
-
-Two options, in order of preference:
-
-### Option A — written permission from the author
-
-The smallest set that would achieve full self-containment for this project:
+### Included
 
 ```
-ir_launch/launch/assignment_1.launch.py        Apache-2.0  - already permitted
-ir_launch/launch/spawn_tb3_launch.py           Apache-2.0  - already permitted
-ir_base/worlds/iaslab_camera_tables.sdf        needs permission
-ir_base/maps/lab_map.pgm                       needs permission
-ir_base/maps/lab_map.yaml                      needs permission
-ir_base/params/nav2_params.yaml                needs permission
-ir_base/params/turtlebot3_waffle_bridge.yaml   needs permission
-ir_base/urdf/turtlebot3_waffle.urdf            needs permission
-ir_base/urdf/camera.urdf                       needs permission
-ir_base/models/artag/**                        needs permission
-ir_base/{package.xml,CMakeLists.txt}           needs permission
+third_party/ir_2526/                                 70 files, 1.6 MB
+├── ir_launch/          assignment_1.launch.py, spawn_tb3_launch.py
+└── ir_base/            worlds/ maps/ params/ urdf/ rviz/ models/{artag,cafe_table}
 ```
 
-A short request to the author covering redistribution of the `ir_base` assets
-under a permissive licence, with attribution, is all that is required. The
-`ir_launch` and `apriltag_ros` components already carry permissive licences.
-
-Attribution is not negotiable in return: the upstream author and the original
-upstream projects (OSRF/Nav2, ROBOTIS/TurtleBot 3, AprilRobotics) would all be
-credited in a `NOTICE` file, and the modifications made for the course would be
-stated, as Apache-2.0 §4(b) requires.
-
-### Option B — no permission available
-
-Rebuild the environment from upstream open-source projects instead of using the
-course's copy:
-
-| Need | Legitimate upstream source |
+| Component | Role |
 |---|---|
-| TurtleBot 3 model + meshes | `turtlebot3_description` (Apache-2.0, ROBOTIS) |
-| Nav2 parameters | `nav2_bringup` defaults (Apache-2.0, Open Navigation LLC) |
-| World | would have to be re-authored, since the course world is the author's own work |
-| Map | regenerated by SLAM in the new world |
-| AprilTag detector | `apriltag_ros` (MIT) or `dt_apriltags` (BSD) |
+| `ir_base/worlds/iaslab_camera_tables.sdf` | the world this project runs in |
+| `ir_base/urdf/turtlebot3_waffle.urdf` | the robot, including its RGB camera link |
+| `ir_base/urdf/camera.urdf` | the external camera description |
+| `ir_base/params/nav2_params.yaml` | the Nav2 tuning this pipeline was verified against |
+| `ir_base/params/turtlebot3_waffle_bridge.yaml` | ROS–Gazebo bridge topics |
+| `ir_base/maps/lab_map.pgm` / `.yaml` | the occupancy map |
+| `ir_base/models/artag/`, `models/cafe_table/` | the only models the world references |
+| `ir_base/rviz/` | rviz configuration |
+| `ir_launch/launch/` | the simulation entry points |
 
-This yields a runnable project that owes nothing to the course repository, but the
-world geometry and the tuning would differ, so the recorded demonstrations would
-no longer correspond exactly to the published configuration. That trade-off is the
-user's to make, not one to make silently.
+### Deliberately excluded
 
-## Running it today, with the dependency
+| Excluded | Why |
+|---|---|
+| `ir_base/models/build`, `models/install`, `models/log` | colcon build artefacts accidentally committed upstream — not part of the environment |
+| `ir_base/models/docks`, `models/objects`, `models/walls` | **not referenced by the world.** Excluding them also reduces third-party exposure: `models/walls/arena_walls` is credited to a further author (Elisa Tosello) and `objects`/`docks` carry no authorship at all |
+| `ir_desription`, `ir_movit_config` | UR5-specific; they belong to the companion repository |
+| `apriltag_ros` | a pristine copy of upstream `apriltag_ros` 3.3.0 (MIT), available as the distribution package `ros-$ROS_DISTRO-apriltag-ros`; bundling a duplicate adds nothing |
 
-Until one of the options above is resolved, the project runs against the upstream
-environment exactly as it originally did:
+The world file was inspected for `model://` references: only `models/artag` and
+`models/cafe_table` are required. Nothing omitted is needed to run the project.
 
-```bash
-mkdir -p ~/ros2_ws/src && cd ~/ros2_ws/src
-git clone https://github.com/PieroSimonet/ir_2526.git
-cd ir_2526 && git checkout d19ae7613e50112f9bcd8bd995bb4572ef71b821
-# then clone this repository alongside it and build the workspace
-cd ~/ros2_ws && colcon build --symlink-install
-```
+## Package names are unchanged
 
-Pinning the commit matters: the upstream repository may change or disappear, and
-this project was verified against `d19ae761`.
+`ir_launch` and `ir_base` keep their original names, because the launch files and
+the Gazebo world resolve them by name —
+`get_package_share_directory('ir_base')` and
+`model://ir_base/models/artag/...`. Renaming either would break the environment,
+so `colcon` builds them exactly as upstream intended.
+
+## Still required from the system
+
+Standard ROS 2 packages only, installed through `rosdep`/`apt`:
+
+`navigation2`, `nav2-bringup`, `nav2-minimal-tb3-sim`, `turtlebot3`,
+`turtlebot3-gazebo`, `apriltag-ros`, `image-proc`, `ros-gz`, `python3-numpy`.
+
+## Open question before publication
+
+The professor's permission covers **his** work. Two directories inside the
+required set — `models/artag` (Nicola Castaman) and `models/cafe_table`
+(Nate Koenig / Open Robotics) — were authored by other people and carry no stated
+licence.
+
+Either:
+
+1. **confirm** that the permission extends to those third-party assets, or obtain
+   their authors' agreement; or
+2. **replace them**: `models/artag` can be regenerated from the public AprilTag
+   `36h11` family definition (AprilRobotics, BSD-2-Clause) as original work, and
+   `models/cafe_table` can be replaced with an equivalent table model from a
+   permissively licensed source.
+
+Until that is settled, this repository carries an **unresolved third-party
+attribution question** for those two directories. Everything else in
+`third_party/` is either the professor's own work under his permission, or
+permissively licensed with its notice intact.
 
 ## Attribution
 
-The simulation environment, its world, map, robot and camera descriptions,
-AprilTag models and Nav2 tuning are the work of its original author
-(**Piero Simonetto**, University of Padova). Nothing in this repository claims
-that work. Where the environment is used, it is used unmodified and credited.
+The simulation environment — its world, map, RobotBot 3 and camera descriptions,
+AprilTag models and Nav2 tuning — is the work of its original author,
+**Piero Simonetto** (University of Padova). Nothing in this repository claims that
+work, and it is used unmodified.
 
 The upstream launch files are themselves derived from:
 
@@ -165,3 +148,4 @@ The upstream launch files are themselves derived from:
 - **Open Navigation LLC** — Apache-2.0
 - **Stogl Robotics Consulting UG** — BSD-3-Clause
 - **Universal Robots** — BSD-3-Clause
+- **AprilTag / AprilRobotics** — BSD-2-Clause (tag family definitions)

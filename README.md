@@ -305,10 +305,17 @@ turtlebot3-navigation-perception/
 └── src/                        <- colcon workspace root
     ├── group29_assignment_1/          Implementation B (baseline + corridor)
     └── group29_assignment_1_kalman/   Implementation A (Kalman)
+
+third_party/
+└── ir_2526/                    vendored simulation environment
+    ├── README.md               provenance + licence status
+    ├── NOTICE                  attribution for every author and upstream project
+    ├── ir_launch/              simulation entry points
+    └── ir_base/                world, map, params, URDFs, AprilTag models
 ```
 
 The repository root **is** the colcon workspace, so `colcon build` is run from
-the root.
+the root and picks up both `src/` and `third_party/`.
 
 ## Technologies and dependencies
 
@@ -362,38 +369,23 @@ sudo apt install -y \
 
 ### 3. Get the code and build
 
+This repository **is** the colcon workspace — the project's packages live in
+`src/` and the vendored simulation environment in `third_party/ir_2526/`.
+
 ```bash
-mkdir -p ~/ros2_ws/src && cd ~/ros2_ws/src
-git clone https://github.com/alishavakhi/turtlebot3-navigation-perception.git
+git clone https://github.com/alishavakhi/turtlebot3-navigation-perception.git ~/ros2_ws
 cd ~/ros2_ws
 source /opt/ros/$ROS_DISTRO/setup.bash
-rosdep install --from-paths src --ignore-src -r -y
+rosdep install --from-paths src third_party --ignore-src -r -y
 colcon build --symlink-install
 source install/setup.bash
 ```
 
-The repository root is the colcon workspace root, so `colcon build` is run from
-the repository directory. Build only the packages that fail, if any:
+`colcon` discovers packages recursively, so this builds both the project's two
+packages and the vendored environment. To build only the project's own code:
 
 ```bash
 colcon build --symlink-install --packages-select group29_assignment_1
-```
-
-### 4. The simulation environment
-
-The simulation world, map, robot description and Nav2 tuning come from a separate
-third-party repository that is **not bundled here** for licensing reasons —
-see **[`docs/UPSTREAM_DEPENDENCIES.md`](docs/UPSTREAM_DEPENDENCIES.md)** for the
-full explanation, the exact upstream commit, and what would be required to make
-this repository self-contained.
-
-Until that is resolved, clone it alongside this repository:
-
-```bash
-cd ~/ros2_ws/src
-git clone https://github.com/PieroSimonet/ir_2526.git
-cd ir_2526 && git checkout d19ae7613e50112f9bcd8bd995bb4572ef71b821
-cd ~/ros2_ws && colcon build --symlink-install && source install/setup.bash
 ```
 
 > **ROS 2 distribution.** The original project never declared one, and no
@@ -402,6 +394,30 @@ cd ~/ros2_ws && colcon build --symlink-install && source install/setup.bash
 > [Reproducibility status](#reproducibility-status). The packages are written
 > against the `rclpy` / Nav2 APIs current in Humble and Jazzy, but this has not
 > been confirmed by building.
+
+### 4. The simulation environment — vendored
+
+No external repository needs to be cloned. The Gazebo world, occupancy map,
+TurtleBot 3 and camera descriptions, AprilTag models and Nav2 tuning are all
+included under [`third_party/ir_2526/`](third_party/ir_2526/), vendored at the
+exact upstream commit this project was verified against:
+
+```
+third_party/ir_2526/   ir_launch + ir_base
+                       @ PieroSimonet/ir_2526 d19ae761
+```
+
+These files were written by **Piero Simonetto** (University of Padova), not by
+this project's author, and are redistributed with his permission. They are
+**not** covered by this repository's Apache-2.0 licence. Authorship, the exact
+provenance, the licence status of every component and the build instructions are
+documented in [`third_party/ir_2526/README.md`](third_party/ir_2526/README.md)
+and [`third_party/ir_2526/NOTICE`](third_party/ir_2526/NOTICE); the reasoning and
+the full component matrix are in
+[`docs/UPSTREAM_DEPENDENCIES.md`](docs/UPSTREAM_DEPENDENCIES.md).
+
+Every vendored file is byte-identical to upstream — no header, copyright notice
+or licence declaration was altered.
 
 ## Running the system
 
@@ -606,9 +622,21 @@ Licensed under **Apache-2.0** — see [`LICENSE`](LICENSE). The original package
 already carried this licence and declaration; it has been preserved.
 
 **Scope of the licence:** Apache-2.0 covers the source code, configuration and
-documentation in this repository. The academic report in
-[`docs/reports/`](docs/reports/) is the authors' own work, included with the
-co-author's consent. No third-party code is vendored: Nav2, `apriltag_ros`,
+documentation in this repository — that is, `src/`, `docs/` and the READMEs.
+
+It **does not** cover:
+
+- **`third_party/ir_2526/`** — the vendored simulation environment, written by
+  **Piero Simonetto** and redistributed with his permission. Copyright remains
+  with the original authors; see
+  [`third_party/ir_2526/NOTICE`](third_party/ir_2526/NOTICE). Two model
+  directories within it are authored by third parties
+  (`models/artag` — Nicola Castaman; `models/cafe_table` — Nate Koenig /
+  Open Robotics) and are also not covered.
+- **`docs/reports/`** — the academic report, the authors' own work, included with
+  the co-author's consent.
+
+No third-party code is vendored outside `third_party/`: Nav2, `apriltag_ros`,
 `image_proc`, TurtleBot 3 and Gazebo are consumed as installed upstream packages
 under their own licences.
 

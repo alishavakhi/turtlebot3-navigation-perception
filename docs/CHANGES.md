@@ -223,6 +223,45 @@ it now claims neither too little nor too much.
 the full system dependency list, `colcon` build steps, simulation startup, and a
 step-by-step description of what a successful run looks like.
 
+## 9. Simulation environment vendored — the repository is now self-contained
+
+Following the author's permission, the simulation environment is now included in
+this repository under `third_party/ir_2526/`. Cloning the external repository is
+no longer required.
+
+**Added** (70 files, byte-identical to upstream):
+
+```
+third_party/ir_2526/README.md   provenance, licence status, what's included
+third_party/ir_2526/NOTICE      attribution for every author and upstream project
+third_party/ir_2526/ir_launch/  assignment_1.launch.py, spawn_tb3_launch.py
+third_party/ir_2526/ir_base/    worlds, maps, params, urdf, rviz, models
+```
+
+**Deliberately not copied:**
+
+| Excluded | Why |
+|---|---|
+| `models/build`, `models/install`, `models/log` | colcon build artefacts accidentally committed upstream |
+| `models/docks`, `models/objects`, `models/walls` | not referenced by the world; excluding them also limits third-party exposure, since `arena_walls` is credited to a further author |
+| `apriltag_ros` | pristine upstream 3.3.0 (MIT), available as `ros-$ROS_DISTRO-apriltag-ros`; a duplicate would add nothing |
+
+**Integrity:** all 70 files were hashed against the upstream snapshot after
+copying and every one is identical. No header, copyright notice or licence
+declaration was altered. Upstream package names are preserved because the launch
+files and the world resolve them by name.
+
+**Licence boundary:** the root `LICENSE` (Apache-2.0) now explicitly states that
+it covers only `src/`, `docs/` and the READMEs, and **not** `third_party/`. No
+licence was invented for the vendored material — its status is "redistributed
+with the author's permission, copyright remains with the original authors".
+
+**Open item:** two model directories inside the required set are credited to other
+authors (`models/artag` — Nicola Castaman; `models/cafe_table` — Nate Koenig /
+Open Robotics) and carry no stated licence. The author's permission covers his own
+work; whether it extends to those is an open question, recorded in
+`docs/UPSTREAM_DEPENDENCIES.md`.
+
 ## Publication blockers — remaining
 
 Only one blocker is left, and it is not a technical one:
