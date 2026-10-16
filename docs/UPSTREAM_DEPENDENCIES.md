@@ -114,26 +114,29 @@ Standard ROS 2 packages only, installed through `rosdep`/`apt`:
 `navigation2`, `nav2-bringup`, `nav2-minimal-tb3-sim`, `turtlebot3`,
 `turtlebot3-gazebo`, `apriltag-ros`, `image-proc`, `ros-gz`, `python3-numpy`.
 
-## Open question before publication
+## Third-party scope question — raised, and answered on publication
 
 The professor's permission covers **his** work. Two directories inside the
 required set — `models/artag` (Nicola Castaman) and `models/cafe_table`
 (Nate Koenig / Open Robotics) — were authored by other people and carry no stated
-licence.
+licence of their own. This was put to the repository owner before publication; on
+2026-10-16 publication was authorised on the basis that these files are part of
+the environment being redistributed with the original author's permission, with
+every authorship notice preserved verbatim.
 
-Either:
+Stated plainly, so nothing here reads as a licence it is not:
 
-1. **confirm** that the permission extends to those third-party assets, or obtain
-   their authors' agreement; or
-2. **replace them**: `models/artag` can be regenerated from the public AprilTag
-   `36h11` family definition (AprilRobotics, BSD-2-Clause) as original work, and
-   `models/cafe_table` can be replaced with an equivalent table model from a
-   permissively licensed source.
+- these two directories carry **no licence text of their own**. None was invented
+  for them, and they are not covered by this repository's Apache-2.0 licence;
+- they are included unmodified, with their authors' own `model.config` credits
+  exactly as upstream wrote them and recorded in `../third_party/ir_2526/NOTICE`;
+- if the question is ever revisited, `models/artag` can be regenerated from the
+  public AprilTag `36h11` family definition (AprilRobotics, BSD-2-Clause) as
+  original work, and `models/cafe_table` replaced with an equivalent table model
+  from a permissively licensed source. Either is a one-commit change.
 
-Until that is settled, this repository carries an **unresolved third-party
-attribution question** for those two directories. Everything else in
-`third_party/` is either the professor's own work under his permission, or
-permissively licensed with its notice intact.
+Everything else in `third_party/` is either the professor's own work under his
+permission, or permissively licensed with its notice intact.
 
 ## Attribution
 

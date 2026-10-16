@@ -540,12 +540,17 @@ next step and is listed under [Known limitations](#known-limitations).
 Recorded honestly from reading the code; none of these were altered during
 preparation.
 
-1. **The simulation environment is an external dependency.** Neither launch file is
-   self-contained — they need the course's `ir_launch` / `ir_base` packages, which
-   are **not** bundled because the upstream repository is unlicensed.
-   [`docs/UPSTREAM_DEPENDENCIES.md`](docs/UPSTREAM_DEPENDENCIES.md) gives the
-   provenance, the full licensing matrix and the two routes to making this
-   repository self-contained;
+1. **The environment is vendored, but the ROS 2 distribution is not pinned.** The
+   course's `ir_launch` and `ir_base` packages are included under
+   [`third_party/ir_2526/`](third_party/ir_2526/), vendored byte-identically at
+   upstream commit `d19ae761`, so no external repository has to be cloned. What
+   remains external is ordinary ROS 2 distribution packages
+   (`nav2-minimal-tb3-sim`, `ur_description`, `ros_gz`), each under its own
+   licence. What is *not* settled is the distribution itself — Humble or Jazzy;
+   see [Reproducibility status](#reproducibility-status). Provenance and the
+   licence boundary are in
+   [`docs/UPSTREAM_DEPENDENCIES.md`](docs/UPSTREAM_DEPENDENCIES.md) and
+   [`third_party/ir_2526/NOTICE`](third_party/ir_2526/NOTICE);
    [`docs/RUNNING.md`](docs/RUNNING.md) is the interface reference.
 2. **Scan indexing assumes `angle_min == 0`.** The corridor controller computes
    angles as `np.arange(len(ranges)) * angle_increment`, ignoring
@@ -596,7 +601,8 @@ repository. Nothing in the right-hand column was executed here.
 | Python syntax of every node | — | verified (`py_compile`) |
 | `package.xml` well-formed, deps cross-checked against imports | — | verified |
 | Node / topic / action / service names documented in this README | — | verified against source |
-| Secrets, personal data, vendored code | — | verified absent |
+| Secrets and personal data | — | verified absent |
+| Vendored third-party code | — | present and intentional: `third_party/ir_2526/` only, hashed byte-identical to upstream `d19ae761` (see `docs/CHANGES.md`) |
 
 Every interface documented in this README was read from the source, not inferred.
 The build and launch commands follow standard ROS 2 practice for this workspace

@@ -259,14 +259,37 @@ with the author's permission, copyright remains with the original authors".
 **Open item:** two model directories inside the required set are credited to other
 authors (`models/artag` — Nicola Castaman; `models/cafe_table` — Nate Koenig /
 Open Robotics) and carry no stated licence. The author's permission covers his own
-work; whether it extends to those is an open question, recorded in
+work; the scope question that raised was put to
+the repository owner and answered at publication — see section 9 and
 `docs/UPSTREAM_DEPENDENCIES.md`.
 
-## Publication blockers — remaining
+## 9. Publication, and the consent record
 
-Only one blocker is left, and it is not a technical one:
+**Published 2026-10-16.** Both consent gates that were open when the sections
+above were written are now closed, and the repository is public.
 
-1. **Collaborator consent.** `group29_assignment_1` includes 5 commits by
-   Vaheid Labbaf, and the accompanying report is co-authored by him. Consent to
-   publish this repository has **not** been confirmed. It should not be made
-   public until it is.
+1. **Collaborator consent.** `group29_assignment_1` includes commits by Vaheid
+   Labbaf, and the accompanying report is co-authored by him. The repository
+   owner confirmed on 2026-10-16 that Vaheid Labbaf agreed to publication of the
+   shared projects. Attribution is kept accurate per path — see
+   `../CONTRIBUTORS.md` and the *My contribution* section of the README; nothing
+   by another author is presented as the owner's.
+2. **Redistribution permission for the simulation environment.** The original
+   author's permission to redistribute the environment files with attribution was
+   confirmed on 2026-10-16, and the environment is vendored in section 8 above. A
+   scope question was raised on the same day for the two directories inside it
+   that are credited to other authors (`models/artag`, `models/cafe_table`); the
+   owner authorised publication with those notices preserved unmodified. Their
+   licence status remains documented, unresolved and unhidden in
+   `UPSTREAM_DEPENDENCIES.md` and `../third_party/ir_2526/NOTICE`.
+
+**Documentation corrected in the same pass**, after a verification run against
+the live repository:
+
+- *Known limitations* previously described the simulation environment as "not
+  bundled" — true before section 8, false after it. Corrected.
+- The reproducibility table listed "vendored code" as *verified absent*, which
+  section 8 contradicts. Split into *secrets and personal data* (absent) and
+  *vendored third-party code* (present, intentional, hashed).
+- This section previously stated that collaborator consent had not been
+  confirmed; it now records the consent that was obtained.
