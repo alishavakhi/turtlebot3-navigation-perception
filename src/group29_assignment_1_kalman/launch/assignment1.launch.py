@@ -44,21 +44,21 @@ def generate_launch_description():
         ),
 
         Node(
-            package='group29_assignment_1',
+            package='group29_assignment_1_kalman',
             executable='april_tag_node.py',
             name='AprilTag',
             output='log'
         ),
 
         Node(
-            package='group29_assignment_1',
+            package='group29_assignment_1_kalman',
             executable='navigation_node.py',
             name='Navigation',
             output='log'
         ),
 
         Node(
-            package='group29_assignment_1',
+            package='group29_assignment_1_kalman',
             executable='table_detector.py',
             name='TableDec',
             output='screen'
