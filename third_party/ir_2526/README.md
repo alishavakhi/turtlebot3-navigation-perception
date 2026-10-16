@@ -82,6 +82,30 @@ third_party/ir_2526/
 | `ir_base/models/build`, `models/install`, `models/log` | colcon build artefacts accidentally committed upstream — not part of the environment |
 | `ir_base/models/docks`, `models/objects`, `models/walls` | **not referenced by either simulation world.** Omitting them limits how much third-party material is redistributed, since `models/walls/arena_walls` is credited to a further author (Elisa Tosello) and `objects`/`docks` carry no authorship at all |
 | `apriltag_ros` | a pristine upstream copy of `apriltag_ros` 3.3.0 (MIT). It is available as the standard distribution package `ros-$ROS_DISTRO-apriltag-ros`, so bundling a duplicate would add nothing |
+| `ir_launch/launch/assignment_2.launch.py`, `exercise_4.launch.py` | launch files for the other assignment and for a different exercise. They are **not used by this project** and `assignment_2.launch.py` references packages (`ir_desription`, `ir_movit_config`) that belong to the companion repository, so shipping it here would leave a launch file that cannot run |
+| `ir_desription`, `ir_movit_config` | UR5-specific; they belong to the companion repository |
+
+> **This is a subset of the upstream `ir_launch` package** — two of its four
+> launch files are here. Every file present is byte-identical to upstream; none
+> was edited. `ir_base` is complete apart from the model directories listed above.
+
+## A dependency worth knowing about
+
+`ir_launch/launch/assignment_1.launch.py` calls
+`get_package_share_directory('ur_description')` unconditionally, even though this
+is a TurtleBot 3 project — it uses that path to build the Gazebo resource path.
+
+That means **`ros-$ROS_DISTRO-ur-description` must be installed**, or the
+simulation launch fails immediately with a `PackageNotFoundError`. It is listed
+in the repository's install instructions for that reason. The line is upstream's
+own (unmodified); this is documented rather than patched, so the vendored file
+stays byte-identical.
+
+## Hidden dependency to install
+
+| Package | Why |
+|---|---|
+| `ur-description` | required by `assignment_1.launch.py` even on the TurtleBot 3 project — see above |
 
 Nothing was omitted that either world needs. The world files were inspected for
 `model://` references and only `models/artag` and `models/cafe_table` are

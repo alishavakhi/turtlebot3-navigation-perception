@@ -363,9 +363,18 @@ sudo apt install -y \
   ros-$ROS_DISTRO-nav2-minimal-tb3-sim \
   ros-$ROS_DISTRO-turtlebot3 ros-$ROS_DISTRO-turtlebot3-gazebo \
   ros-$ROS_DISTRO-apriltag-ros ros-$ROS_DISTRO-image-proc \
-  ros-$ROS_DISTRO-ros-gz \
+  ros-$ROS_DISTRO-ros-gz ros-$ROS_DISTRO-ros-gz-bridge \
+  ros-$ROS_DISTRO-ur-description \
   python3-numpy python3-colcon-common-extensions
 ```
+
+> **Note the `ur-description` line.** It looks out of place on a TurtleBot 3
+> project, but the vendored `ir_launch/launch/assignment_1.launch.py` calls
+> `get_package_share_directory('ur_description')` unconditionally to build the
+> Gazebo resource path. Without it, the simulation launch fails immediately with
+> a `PackageNotFoundError`. The line is upstream's own and is left unmodified;
+> it is documented here rather than patched, so the vendored file stays
+> byte-identical to the commit it came from.
 
 ### 3. Get the code and build
 
