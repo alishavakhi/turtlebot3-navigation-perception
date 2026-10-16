@@ -1,5 +1,7 @@
 # TurtleBot3 Navigation and Perception
 
+Developed as part of academic coursework at the University of Padova, Italy.
+
 A modular ROS 2 pipeline that drives a simulated **TurtleBot 3** to an
 AprilTag-defined goal, navigates there with the **Nav2** stack, hands off to a
 **LiDAR corridor-following controller** in narrow passages, and finally detects
